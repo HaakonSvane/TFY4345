@@ -82,12 +82,12 @@ class Solver:
 
         self.t.start()
         print("\n---------Stats from using solver '%s' (%s)---------"
-              "(mass=%.1f, length=%.1f, dt=%.3f, Nt=%s, Fd=%.1f, Od=%.1f, q=%.3f, \Omega = )---------" % (
+              "(mass=%.1f, length=%.1f, dt=%.3f, Nt=%s, Fd=%.1f, Od=%.1f, q=%.3f, O=%.3f)---------" % (
                   self.method,self.dampening, self.mass, self.length, self.dt, round(T_MAX / self.dt),
-                  self.Fd, self.omega_d, self.q))
+                  self.Fd, self.omega_d, self.q, np.sqrt(g_acc/self.length)))
         self.function()
         self.t.stop_and_get()
-        print("-" * 140 + "")
+        print("-" * 145 + "")
         return self.t_arr, self.y_arr, self.y_vel_arr, self.energy_arr
 
     def _calc_energy(self, y_array, y_vel_array):
@@ -135,50 +135,127 @@ class Solver:
         return self.t_arr, self.y_arr, self.y_vel_arr, self.energy_arr
 
     def _analytical_solution(self):
-        if self.Fd != 0 or self.dampening == "none":
-            A = self.omega_d ** 4 - 2 * (self.omega_d ** 2) * (g_acc / self.length) + (self.omega_d ** 2) * (
-                    self.q ** 2) + (g_acc / self.length) ** 2
-            C1 = (self.Fd * self.omega_d * ((g_acc / self.length) - self.omega_d ** 2)) / (A * self.omega_d)
-            C2 = (self.Fd * self.omega_d * self.q) / A
-            C3 = ((self.Fd * self.omega_d * self.q) / A) + init_theta
-            C4 = ((self.Fd * self.omega_d)/A) * ((self.omega_d**2 - (g_acc/self.length) + (1/2)*(self.q**2))/(np.sqrt((g_acc/self.length) - (1/4) * (self.q**2)))) - (((1/2)*self.q * init_theta - init_theta_vel - init_theta * self.q)/(np.sqrt((g_acc/self.length) - (1/4) * (self.q**2))))
-            formula_y = lambda t: C1 * np.sin(self.omega_d * t) - C2 * np.cos(self.omega_d * t) + \
-                                  np.exp(- (1 / 2) * self.q * t) * (C3 * np.cos(np.sqrt((g_acc / self.length) -
-                                                                                        (1 / 4) * (self.q ** 2)) * t) +
-                                                                    C4 * np.sin(np.sqrt((g_acc / self.length) -
-                                                                                        (1 / 4) * (self.q ** 2)) * t))
 
-            formula_y_der = lambda t: C1 * self.omega_d * np.cos(self.omega_d * t) + C2 * self.omega_d * np.sin(
-                self.omega_d * t) - (1 / 2) * self.q * np.exp(-(1 / 2) * self.q * t) * (
-                                              C3 * np.cos(
-                                          np.sqrt((g_acc / self.length) - (1 / 4) * (self.q ** 2)) * t) + C4 * np.sin(
-                                          np.sqrt((g_acc / self.length) - (1 / 4) * (self.q ** 2)) * t)) + np.exp(
-                -(1 / 2) * self.q * t) * (
-                                              -C3 * np.sqrt((g_acc / self.length) - (1 / 4) * (self.q ** 2)) * np.sin(
-                                          np.sqrt((g_acc / self.length) - (1 / 4) * (self.q ** 2)) * t) + C4 * np.sqrt(
-                                          (g_acc / self.length) - (1 / 4) * (self.q ** 2)) * np.cos(
-                                          np.sqrt((g_acc / self.length) - (1 / 4) * (self.q ** 2)) * t))
-        else:
-            if self.dampening == "underdamped":
-                A = np.sqrt(g_acc/self.length-(self.q**2)/4)
-                C_1 = init_theta
-                C_2 = (2*init_theta_vel+self.q*init_theta)/(2*A)
-                formula_y = lambda t: np.exp(-self.q*t/2)*(C_1*np.cos(A*t)+C_2*np.sin(A*t))
-                formula_y_der = lambda t: np.exp(-self.q*t/2)*(-self.q*init_theta/2*np.cos(A*t)-self.q*C_2/2*np.sin(A*t)-init_theta*A*np.sin(A*t)+C_2*A*np.cos(A*t))
+        omega = g_acc / self.length
+        if self.dampening == "critical damping":
+            A1 = init_theta + (16 * self.Fd * self.omega_d * self.q) / ((self.q ** 2 + 4 * self.omega_d ** 2) ** 2)
+            A2 = init_theta_vel + (1 / 2) * self.q * A1 + (4 * self.Fd * self.omega_d) / (
+                        4 * self.omega_d ** 2 + self.q ** 2) - (
+                         8 * self.Fd * self.omega_d * self.q ** 2) / ((self.q ** 2 + 4 * self.omega_d ** 2) ** 2)
 
-            elif self.dampening == "overdamped":
-                a = -(self.q/2-np.sqrt(self.q**2/4-g_acc/self.length))
-                b = -(self.q/2+np.sqrt(self.q**2/4-g_acc/self.length))
-                C_2 = (init_theta_vel-a*init_theta)/(b-a)
-                C_1 = init_theta-C_2
-                formula_y = lambda t: C_1*np.exp(a*t) + C_2*np.exp(b*t)
-                formula_y_der = lambda t: a*C_1*np.exp(a*t) + b*C_2*np.exp(b*t)
+            formula_y = lambda t: A1 * np.exp(-(self.q * t) / 2) + A2 * t * np.exp(-(self.q * t) / 2) - (
+                        (2 * self.Fd) / ((self.q ** 2 + 4 * self.omega_d ** 2) ** 2)) * (
+                                          (
+                                                      self.q ** 3 * t - 2 * self.q ** 2 + 4 * self.q * t * self.omega_d ** 2 + 8 * self.omega_d ** 2) * np.sin(
+                                      self.omega_d * t)
+                                          - 2 * self.omega_d * (
+                                                      self.q ** 2 * t - 4 * self.q + 4 * t * self.omega_d ** 2) * np.cos(
+                                      self.omega_d * t)) + (
+                                          (2 * self.Fd * t) / (self.q ** 2 + 4 * self.omega_d ** 2)) * (
+                                              self.q * np.sin(self.omega_d * t) - 2 * self.omega_d * np.cos(
+                                          self.omega_d * t))
 
-            elif self.dampening == "critical damping":
-                C_1 = init_theta
-                C_2 = init_theta_vel+self.q*init_theta/2
-                formula_y = lambda t: (C_1+C_2*t)*np.exp(-self.q*t/2)
-                formula_y_der = lambda t: np.exp(-self.q*t/2)*(C_2*(1-self.q*t/2)-self.q*init_theta/2)
+            formula_y_der = lambda t: -(1 / 2) * self.q * A1 * np.exp(-(self.q * t) / 2) - (
+                        1 / 2) * self.q * A2 * t * np.exp(-(self.q * t) / 2) + A2 * np.exp(
+                -(self.q * t) / 2) - ((2 * self.Fd) / ((4 * self.omega_d ** 2 + self.q ** 2) ** 2)) * (
+                                                  self.omega_d * self.q *
+                                                  (
+                                                              4 * self.omega_d ** 2 * t + self.q ** 2 * t - 4 * self.q) * np.cos(
+                                              self.omega_d * t) + (8 * self.omega_d ** 4 * t
+                                                                   + 2 * self.omega_d ** 2 * self.q * (
+                                                                               self.q * t - 2) + self.q ** 3) * np.sin(
+                                              self.omega_d * t)) + (
+                                              (2 * self.Fd) / (4 * self.omega_d ** 2 + self.q ** 2)) * (
+                                                  (2 * self.omega_d ** 2 * t + self.q) * np.sin(self.omega_d * t)
+                                                  + self.omega_d * (self.q * t - 2) * np.cos(self.omega_d * t))
+
+        elif self.dampening == "overdamped":
+            phi = np.sqrt(self.q ** 2 - 4 * omega)
+            k1 = (1 / 2) * (phi - self.q)
+            k2 = (1 / 2) * (phi + self.q)
+            A_ = (4 * self.Fd * self.omega_d) / (phi * ((self.q - phi) ** 2 + 4 * self.omega_d ** 2))
+            B_ = (4 * self.Fd * self.omega_d) / (phi * ((self.q + phi) ** 2 + 4 * self.omega_d ** 2))
+            C_ = (2 * self.Fd * self.omega_d * (self.q - phi)) / (
+                        phi * ((self.q - phi) ** 2 + 4 * self.omega_d ** 2))
+            D_ = (2 * self.Fd * self.omega_d * (self.q + phi)) / (
+                        phi * ((self.q + phi) ** 2 + 4 * self.omega_d ** 2))
+            A1 = (A_ * k2 - B_ * k2 - C_ + D_ + k2 * init_theta + init_theta_vel) / (k1 + k2)
+            A2 = (A_ * k1 - B_ * k1 + C_ - D_ + k1 * init_theta - init_theta_vel) / (k1 + k2)
+
+            formula_y = lambda t: A1 * np.exp((phi - self.q) * t / 2) + A2 * np.exp(-(phi + self.q) * t / 2) + (
+                    (2 * self.Fd) / (phi * ((self.q - phi) ** 2 + 4 * self.omega_d ** 2))) * (
+                                          (self.q - phi) * np.sin(self.omega_d * t) - 2 * self.omega_d * np.cos(
+                                      self.omega_d * t)) - (
+                                          (2 * self.Fd) / (phi * ((self.q + phi) ** 2 + 4 * self.omega_d ** 2))) * (
+                                          (self.q + phi) * np.sin(self.omega_d * t) - 2 * self.omega_d * np.cos(
+                                      self.omega_d * t))
+
+            formula_y_der = lambda t: (1 / 2) * (phi - self.q) * A1 * np.exp((phi - self.q) * t / 2) - (1 / 2) * (
+                        phi + self.q) * A2 * np.exp(
+                -(phi + self.q) * t / 2) + (
+                                              (2 * self.Fd * self.omega_d) / (
+                                                  phi * ((self.q - phi) ** 2 + 4 * self.omega_d ** 2))) * (
+                                              (self.q - phi) * np.cos(self.omega_d * t) + 2 * self.omega_d * np.sin(
+                                          self.omega_d * t)) - (
+                                              (2 * self.Fd * self.omega_d) / (
+                                                  phi * ((self.q + phi) ** 2 + 4 * self.omega_d ** 2))) * (
+                                              (self.q + phi) * np.cos(self.omega_d * t) + 2 * self.omega_d * np.sin(
+                                          self.omega_d * t))
+
+        elif self.dampening == "underdamped" or self.dampening == "none":
+            phi = np.sqrt(omega - (1 / 4) * self.q ** 2)
+            K1 = self.q ** 2 + 4 * (phi - self.omega_d) ** 2
+            K2 = self.q ** 2 + 4 * (phi + self.omega_d) ** 2
+            A1 = init_theta + ((self.Fd * self.q) / phi) * (1 / K1 - 1 / K2)
+            A2 = (init_theta_vel / phi + (1 / 2) * ((self.q * A1) / phi) +
+                  ((2 * self.Fd) / (phi ** 2)) * ((phi - self.omega_d) ** 2 / K1 - (phi + self.omega_d) ** 2 / K2) -
+                  ((2 * self.Fd) / phi) * ((phi - self.omega_d) / K1 - (phi + self.omega_d) / K2))
+
+            formula_y = lambda t: A1 * np.exp(-(self.q * t) / 2) * np.cos(phi * t) + A2 * np.exp(
+                -(self.q * t) / 2) * np.sin(phi * t) - (
+                                          self.Fd / phi) * np.cos(phi * t) * (
+                                          (self.q * np.cos((phi - self.omega_d) * t) + 2 * (
+                                                      phi - self.omega_d) * np.sin((phi - self.omega_d) * t)) / K1
+                                          - (self.q * np.cos((self.omega_d + phi) * t) + 2 * (
+                                              self.omega_d + phi) * np.sin((self.omega_d + phi) * t)) / K2) + (
+                                          self.Fd / phi) * np.sin(phi * t) * (
+                                          (2 * (phi - self.omega_d) * np.cos(
+                                              (phi - self.omega_d) * t) - self.q * np.sin(
+                                              (phi - self.omega_d) * t)) / K1
+                                          + (self.q * np.sin((self.omega_d + phi) * t) - 2 * (
+                                              self.omega_d + phi) * np.cos((self.omega_d + phi) * t)) / K2)
+
+            formula_y_der = lambda t: (- (1 / 2) * self.q * A1 * np.exp(-(self.q * t) / 2) * np.cos(phi * t) -
+                                       A1 * np.exp(-(self.q * t) / 2) * phi * np.sin(phi * t) -
+                                       (1 / 2) * self.q * A2 * np.exp(-(self.q * t) / 2) * np.sin(phi * t) +
+                                       A2 * np.exp(-(self.q * t) / 2) * phi * np.cos(phi * t) -
+                                       (self.Fd / phi) * np.cos(phi * t) *
+                                       ((phi - self.omega_d) * (
+                                                   2 * (phi - self.omega_d) * np.cos((phi - self.omega_d) * t) -
+                                                   self.q * np.sin((phi - self.omega_d) * t)) / K1 -
+                                        (phi + self.omega_d) * (
+                                                    2 * (phi + self.omega_d) * np.cos((phi + self.omega_d) * t) -
+                                                    self.q * np.sin((phi + self.omega_d) * t)) / K2) +
+                                       self.Fd * np.sin(phi * t) *
+                                       ((self.q * np.cos((phi - self.omega_d) * t) + 2 * (
+                                                   phi - self.omega_d) * np.sin((phi - self.omega_d) * t)) / K1
+                                        - (self.q * np.cos((self.omega_d + phi) * t) + 2 * (
+                                                           self.omega_d + phi) * np.sin(
+                                                   (self.omega_d + phi) * t)) / K2) +
+                                       self.Fd * np.cos(phi * t) *
+                                       ((2 * (phi - self.omega_d) * np.cos(
+                                           (phi - self.omega_d) * t) - self.q * np.sin(
+                                           (phi - self.omega_d) * t)) / K1
+                                        + (self.q * np.sin((self.omega_d + phi) * t) - 2 * (
+                                                           self.omega_d + phi) * np.cos(
+                                                   (self.omega_d + phi) * t)) / K2) +
+                                       (self.Fd / phi) * np.sin(phi * t) *
+                                       ((phi - self.omega_d) * (-self.q * np.cos((phi - self.omega_d) * t) -
+                                                                2 * (phi - self.omega_d) * np.sin(
+                                                   (phi - self.omega_d) * t)) / K1 +
+                                        (phi + self.omega_d) * (self.q * np.cos((phi + self.omega_d) * t) +
+                                                                2 * (phi + self.omega_d) * np.sin(
+                                                           (phi + self.omega_d) * t)) / K2))
 
 
         self.t_arr = np.arange(0, T_MAX, self.dt)

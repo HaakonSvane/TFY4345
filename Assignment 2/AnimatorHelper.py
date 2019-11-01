@@ -1,8 +1,8 @@
 '''
     A set of setup-functions used by the Animator class
-    For Assignment 1, TFY4345
+    For Assignment 2, TFY4345
     Created by: Haakon Svane
-    Date: 12. September, 2019
+    Date: 1. November, 2019
 '''
 
 from matplotlib.pyplot import axes, subplots, subplot, subplots_adjust, figure
@@ -173,11 +173,11 @@ class AxisSetup:
         self.slider_dt = Slider(self.ax_dt, "dt", 0.001, 0.3, color=Color.SLIDER_ACTIVE, valinit=self.parent.dt,
                                 valstep=0.001, orientation="vertical", valfmt="%1.3f")
 
-        self.slider_Fd = Slider(self.ax_Fd, "$F_D$", 0.0, 1, color=Color.SLIDER_ACTIVE, valinit=self.parent.F_d,
+        self.slider_Fd = Slider(self.ax_Fd, "$F_D$", 0.0, 2, color=Color.SLIDER_ACTIVE, valinit=self.parent.F_d,
                                 valstep=0.1, orientation="vertical", valfmt="%1.1f")
 
-        self.slider_Om_d = Slider(self.ax_Om_d, "$\Omega_D$", 1, 2*np.pi, color=Color.SLIDER_ACTIVE, valinit=self.parent.Om_d,
-                                valstep=0.1, orientation="vertical", valfmt="%1.1f")
+        self.slider_Om_d = Slider(self.ax_Om_d, "$\Omega_D$", 0.0, 2*np.pi, color=Color.SLIDER_ACTIVE, valinit=self.parent.Om_d,
+                                valstep=0.01, orientation="vertical", valfmt="%1.2f")
 
         self.radio_damping = RadioButtons(self.ax_dampening, ["underdamped", "overdamped", "critical damping", "none"],
                                           active=self.parent.dampening_index,

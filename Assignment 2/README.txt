@@ -1,4 +1,4 @@
-This package contains our solution for Assignment 1 in TFY4345.
+This package contains our solution for Assignment 2 in TFY4345.
 In order to avoid crashes and (unexpected) bugs, matplotlib should be updated to its newest version.
 The code has currently been tested (to a varying degree) in Python 3.6.* and 3.7.* running on MacOS Mojave (10.14.*).
 
