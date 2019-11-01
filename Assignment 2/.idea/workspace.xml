@@ -2,13 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="d3a0c285-6350-4438-aa9b-ca1e5e2b536b" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/AnimatorHelper.py" beforeDir="false" afterPath="$PROJECT_DIR$/AnimatorHelper.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Parameters.py" beforeDir="false" afterPath="$PROJECT_DIR$/Parameters.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.txt" beforeDir="false" afterPath="$PROJECT_DIR$/README.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Solver.py" beforeDir="false" afterPath="$PROJECT_DIR$/Solver.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/testing.py" beforeDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -121,8 +116,16 @@
       <workItem from="1572560068388" duration="374000" />
       <workItem from="1572561307504" duration="248000" />
       <workItem from="1572562444952" duration="606000" />
-      <workItem from="1572564285980" duration="7269000" />
+      <workItem from="1572564285980" duration="8782000" />
     </task>
+    <task id="LOCAL-00001" summary="change parameters and fine tune for final commit">
+      <created>1572623421214</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1572623421214</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -138,6 +141,10 @@
         </entry>
       </map>
     </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="change parameters and fine tune for final commit" />
+    <option name="LAST_COMMIT_MESSAGE" value="change parameters and fine tune for final commit" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/Assignment_2$testing.coverage" NAME="testing Coverage Results" MODIFIED="1572450017021" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />

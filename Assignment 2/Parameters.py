@@ -10,15 +10,15 @@ matplotlib.use('TKAgg')                 # Default backend (support for both wind
 from matplotlib.pyplot import rcParams
 
 FRAME_RATE = 60                         # Frames per second
-T_MAX = 20                               # Time-interval of each plot-segment (length of time-dependent plots)
+T_MAX = 20                              # Time-interval of each plot-segment (length of time-dependent plots)
 
 FIGURE_RATIO = (18, 10)                 # Format: ([WIDTH], [HEIGHT])
-FIGURE_SIZE_FACTOR = 7                  # Any number between 1-10 to set the scaling of the plot
+FIGURE_SIZE_FACTOR = 6                  # Any number between 1-10 to set the scaling of the plot
 
 # Parameters for the matplotlib plots to secure consistency on multiple devices
 rcParams['figure.dpi'] = 100            # Sets the DPI of the figure. Should be left unchanged for best performance
 rcParams["figure.figsize"] = [i/10*FIGURE_SIZE_FACTOR for i in FIGURE_RATIO]
-#rcParams["toolbar"] = "None"
+rcParams["toolbar"] = "None"
 rcParams['axes.titlesize'] = "medium"
 rcParams['axes.formatter.limits'] = -2, 2
 
