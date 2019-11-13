@@ -93,7 +93,7 @@ class AxisSetup:
         self.ax_bob_mass = None
         self.ax_dt = None
         self.ax_dampening = None
-        self.ax_show_calc = None
+        self.ax_second_calc = None
         self.ax_anim_params = None
         self.ax_apply_run = None
         self.ax_reset = None
@@ -153,9 +153,9 @@ class AxisSetup:
         self.ax_dampening = axes([0.82 + slider_pad, p_bot + 0.29 + button_w, button_w, button_w],
                                  facecolor=Color.RADIO_BACKGROUND,
                                  title="Dampening type")
-        self.ax_show_calc = axes([0.82 + slider_pad, p_bot + 0.29, button_w, button_w - 0.05],
-                                 facecolor=Color.RADIO_BACKGROUND,
-                                 title="Analytical solution")
+        self.ax_second_calc = axes([0.82 + slider_pad, p_bot + 0.29, button_w, button_w - 0.05],
+                                   facecolor=Color.RADIO_BACKGROUND,
+                                   title="Second trajectory")
         self.ax_anim_params = axes([0.82 + slider_pad, p_bot + 0.105, button_w, button_w],
                                    facecolor=Color.RADIO_BACKGROUND, title="Animation speed")
 
@@ -184,7 +184,7 @@ class AxisSetup:
                                           activecolor=Color.RADIO_SELECTED)
         for i in self.radio_damping.labels: i.set_fontsize("small")
 
-        self.radio_show_calc = RadioButtons(self.ax_show_calc, ["No", "Yes"],
+        self.radio_show_calc = RadioButtons(self.ax_second_calc, ["No", "Yes"],
                                             active=self.parent.show_analytical,
                                             activecolor=Color.RADIO_SELECTED)
         for i in self.radio_show_calc.labels: i.set_fontsize("small")
