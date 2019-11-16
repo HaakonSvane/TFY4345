@@ -1,8 +1,8 @@
 '''
     A set of setup-functions used by the Animator class
-    For Assignment 2, TFY4345
+    For Assignment 3, TFY4345
     Created by: Haakon Svane
-    Date: 1. November, 2019
+    Date: 13. November, 2019
 '''
 
 from matplotlib.pyplot import axes, subplots, subplot, subplots_adjust, figure
@@ -21,47 +21,54 @@ class AnimatedActors:
         self.circle = None
         self.line_angle = None
         self.line_phase = None
-        self.line_energy = None
+        self.line_strob = None
+        self.line_vel = None
         self.line_angle_diff = None
-        self.line_energy_diff = None
+        self.line_vel_diff = None
         self.color = 0 if plot_color == "default" else plot_color
         self.parent = parent
         self.z_offset = 1 if not self.color == 0 else 0
 
     def init_pendulum_artists(self):
-        self.circle = Circle((0, 0), -np.exp(-self.parent.bob_mass / 30) + 1.1, animated=True,
+        self.circle = Circle((0, 0), -np.exp(-self.parent.bob_mass / 10) + 2.1, animated=True,
                              color=Color.BOB if not self.color else self.color, zorder=10 - self.z_offset)
         self.rod = Line2D([pivot_coords[0], self.circle.get_center()[0]],
                           [pivot_coords[1], self.circle.get_center()[1]], lw=3,
                           animated=True, color=Color.ROD if not self.color else self.color, zorder=5 - self.z_offset)
 
     def init_angle_artists(self, plot_frame):
-        self.line_angle, = plot_frame.plot([], [], animated=True,
+        self.line_angle, = plot_frame.plot([], [], animated=True, linestyle='None',
                                            color=Color.PLOTLINE if not self.color else self.color,
-                                           lw=2 if self.z_offset == 0 else 3,
-                                           zorder=5 - self.z_offset)
+                                           markersize=1 if self.z_offset == 0 else 1,
+                                           zorder=5 - self.z_offset, marker=".")
 
     def init_phase_artists(self, plot_frame):
-        self.line_phase, = plot_frame.plot([], [], animated=True,
+        self.line_phase, = plot_frame.plot([], [], animated=True, linestyle="None",
                                            color=Color.PLOTLINE if not self.color else self.color,
-                                           lw=2 if self.z_offset == 0 else 3,
+                                           markersize=1 if self.z_offset == 0 else 1,
+                                           zorder=5 - self.z_offset, marker=".")
+
+    def init_strob_artists(self, plot_frame):
+        self.line_strob, = plot_frame.plot([], [], animated=True, marker="o", linestyle="None",
+                                           color="darkred" if not self.color else "yellow",
+                                           markersize=6 if self.z_offset == 0 else 8,
                                            zorder=5 - self.z_offset)
 
-    def init_energy_artists(self, plot_frame):
-        self.line_energy, = plot_frame.plot([], [], animated=True,
-                                            color=Color.PLOTLINE if not self.color else self.color,
-                                            lw=2 if self.z_offset == 0 else 3,
-                                            zorder=5 - self.z_offset)
+    def init_vel_artists(self, plot_frame):
+        self.line_vel, = plot_frame.plot([], [], animated=True,
+                                         color=Color.PLOTLINE if not self.color else self.color,
+                                         lw=2 if self.z_offset == 0 else 3,
+                                         zorder=5 - self.z_offset)
 
     def init_angle_diff_artists(self, plot_frame):
         self.line_angle_diff, = plot_frame.plot([], [], animated=True,
                                                 color=Color.PLOTLINE if not self.color else self.color,
-                                                lw=3)
+                                                lw=1)
 
-    def init_energy_diff_artists(self, plot_frame):
-        self.line_energy_diff, = plot_frame.plot([], [], animated=True,
-                                                 color=Color.PLOTLINE if not self.color else self.color,
-                                                 lw=3)
+    def init_vel_diff_artists(self, plot_frame):
+        self.line_vel_diff, = plot_frame.plot([], [], animated=True,
+                                              color=Color.PLOTLINE if not self.color else self.color,
+                                              lw=1)
 
     def attach_pendulum_artists(self, plot_frame):
         plot_frame.add_patch(self.circle)
@@ -69,10 +76,10 @@ class AnimatedActors:
 
 
     def get_artists(self):
-        artists =  (self.line_angle,    self.line_phase,
-                    self.circle,        self.rod,
-                    self.line_energy,   self.line_angle_diff,
-                    self.line_energy_diff)
+        artists =  (self.line_angle, self.line_phase,
+                    self.circle,     self.rod,
+                    self.line_vel,   self.line_angle_diff,
+                    self.line_strob, self.line_vel_diff)
 
         return [i for i in artists if i]
 
@@ -85,9 +92,9 @@ class AxisSetup:
         self.pendulum_plot = None
         self.angle_plot = None
         self.phase_plot = None
-        self.energy_plot = None
+        self.vel_plot = None
         self.angle_plot_diff = None
-        self.energy_plot_diff = None
+        self.vel_plot_diff = None
 
         self.ax_rod_length = None
         self.ax_bob_mass = None
@@ -116,20 +123,19 @@ class AxisSetup:
 
         # Setting the figure and unpacking the different subplots to variables
 
-        if not self.parent.show_analytical:
+        if not self.parent.show_second:
             self.fig, ((self.pendulum_plot, self.angle_plot),
-                       (self.phase_plot,    self.energy_plot)) = subplots(2, 2,
-                                                                          gridspec_kw={'width_ratios': [1, 2.5]})
+                       (self.phase_plot,    self.vel_plot)) = subplots(2, 2,
+                                                                       gridspec_kw={'width_ratios': [1, 2.5]})
         else:
             self.fig = figure()
             self.gs = gridspec.GridSpec(ncols=5*4, nrows=3, figure=self.fig)
             self.pendulum_plot = self.fig.add_subplot(self.gs[0, 0:2*4])
             self.angle_plot = self.fig.add_subplot(self.gs[0, 2*4+1:])
             self.phase_plot = self.fig.add_subplot(self.gs[1, 0:2*4])
-            self.energy_plot = self.fig.add_subplot(self.gs[1, 2*4+1:])
+            self.vel_plot = self.fig.add_subplot(self.gs[1, 2 * 4 + 1:])
             self.angle_plot_diff = self.fig.add_subplot(self.gs[2, 1:10])
-            self.energy_plot_diff = self.fig.add_subplot(self.gs[2, 11:])
-
+            self.vel_plot_diff = self.fig.add_subplot(self.gs[2, 11:])
 
         subplots_adjust(left=p_left, right=p_right, top=p_top, bottom=p_bot, hspace=h_space, wspace=w_space)
         self.fig.set_facecolor(Color.BACKGROUND)
@@ -150,19 +156,23 @@ class AxisSetup:
         self.ax_Om_d = axes([0.815 + slider_pad * 5 + 4 * (slider_w-0.005), 0.73, slider_w-0.005, p_top - p_bot - (0.75 - 0.10)],
                           facecolor=Color.SLIDER_INACTIVE)
 
-        self.ax_dampening = axes([0.82 + slider_pad, p_bot + 0.29 + button_w, button_w, button_w],
+        self.ax_dampening = axes([0.82 + slider_pad, p_bot + 0.315 + button_w, button_w, button_w],
                                  facecolor=Color.RADIO_BACKGROUND,
                                  title="Dampening type")
-        self.ax_second_calc = axes([0.82 + slider_pad, p_bot + 0.29, button_w, button_w - 0.05],
+        self.ax_second_calc = axes([0.82 + slider_pad, p_bot + 0.34, button_w, button_w - 0.065],
                                    facecolor=Color.RADIO_BACKGROUND,
                                    title="Second trajectory")
+
+        self.ax_Dtheta = axes([0.835 + slider_pad, p_bot + 0.30, button_w-0.055, slider_w],
+                                   facecolor=Color.SLIDER_INACTIVE)
+
         self.ax_anim_params = axes([0.82 + slider_pad, p_bot + 0.105, button_w, button_w],
                                    facecolor=Color.RADIO_BACKGROUND, title="Animation speed")
 
         self.ax_apply_run = axes([0.82 + slider_pad, p_bot + 0.05, button_w, slider_w * 2])
         self.ax_reset = axes([0.82 + slider_pad, p_bot, button_w, slider_w * 2])
 
-        self.slider_rod_length = Slider(self.ax_rod_length, "l", 0.5, 5.0, color=Color.SLIDER_ACTIVE,
+        self.slider_rod_length = Slider(self.ax_rod_length, "l", 5, 15, color=Color.SLIDER_ACTIVE,
                                         valinit=self.parent.rod_length,
                                         valstep=0.1, orientation="vertical")
 
@@ -184,10 +194,13 @@ class AxisSetup:
                                           activecolor=Color.RADIO_SELECTED)
         for i in self.radio_damping.labels: i.set_fontsize("small")
 
-        self.radio_show_calc = RadioButtons(self.ax_second_calc, ["No", "Yes"],
-                                            active=self.parent.show_analytical,
-                                            activecolor=Color.RADIO_SELECTED)
-        for i in self.radio_show_calc.labels: i.set_fontsize("small")
+        self.radio_second_calc = RadioButtons(self.ax_second_calc, ["No", "Yes"],
+                                              active=self.parent.show_second,
+                                              activecolor=Color.RADIO_SELECTED)
+        for i in self.radio_second_calc.labels: i.set_fontsize("small")
+
+        self.slider_Dtheta = Slider(self.ax_Dtheta, "$\Delta\\theta$", 0.0, 0.01, color=Color.SLIDER_ACTIVE, valinit=self.parent.init_Dtheta,
+                                valstep=0.0001, orientation="horizontal", valfmt="%1.4f")
 
         self.radio_anim_params = RadioButtons(self.ax_anim_params, ["$1/2$x", "1x", "4x", "10x", "No animation"],
                                               active=self.parent.speed_index,
@@ -231,9 +244,11 @@ class AxisSetup:
         self.phase_plot.set_facecolor(Color.PLOT_BACKGROUND)
         self.phase_plot.set_xlabel('$\Theta$ (rad)')
         self.phase_plot.set_ylabel('$\omega$')
-        self.phase_plot.set_title('Phase space')
+        self.phase_plot.set_title('Stroboscobic/phase space plot')
 
-        fac = np.max(np.abs(self.parent.solutions[0][2]))*(1+0.1) if np.max(np.abs(self.parent.solutions[0][2])) < 2 else 2
+        fac_1 = np.max(np.abs(self.parent.solutions[0][2]))*(1+0.1) if np.max(np.abs(self.parent.solutions[0][2])) < 5 else 5
+        fac_2 = np.max(np.abs(self.parent.solutions[0][1])) * (1 + 0.1) if np.max(np.abs(self.parent.solutions[0][1]))*(1+0.1) < np.pi else np.pi
+        fac = fac_1 if fac_1 > fac_2 else fac_2
         self.phase_plot.set_xlim(-fac, fac)
         self.phase_plot.set_ylim(-fac, fac)
         self.phase_plot.grid(b=True, which='both')
@@ -242,22 +257,22 @@ class AxisSetup:
         self.phase_plot.xaxis.set_minor_locator(AutoMinorLocator(2))
         self.phase_plot.yaxis.set_minor_locator(AutoMinorLocator(2))
 
-    def energy_plot_init(self):
-        self.energy_plot.set_facecolor(Color.PLOT_BACKGROUND)
-        self.energy_plot.set_xlabel('$t$')
-        self.energy_plot.set_ylabel('$E$')
-        self.energy_plot.set_title('Energy $E$ over time $t$')
+    def vel_plot_init(self):
+        self.vel_plot.set_facecolor(Color.PLOT_BACKGROUND)
+        self.vel_plot.set_xlabel('$t$')
+        self.vel_plot.set_ylabel('$\omega$')
+        self.vel_plot.set_title('Angular velocity $\omega$ over time $t$')
 
-        if self.parent.show_analytical:
-            fac = (np.max(np.abs(np.concatenate((self.parent.solutions[0][3], self.parent.solutions[1][3]), axis=0))) * (1 + 0.1)
-                   if np.max(np.abs(np.concatenate((self.parent.solutions[0][3], self.parent.solutions[1][3]), axis=0))) < 100
+        if self.parent.show_second:
+            fac = (np.max(np.abs(np.concatenate((self.parent.solutions[0][2], self.parent.solutions[1][2]), axis=0))) * (1 + 0.1)
+                   if np.max(np.abs(np.concatenate((self.parent.solutions[0][2], self.parent.solutions[1][2]), axis=0))) < 100
                    else 100)
         else:
-            fac = (np.max(np.abs(self.parent.solutions[0][3]))*(1+0.1) if np.max(np.abs(self.parent.solutions[0][3])) < 100 else 100)
-        self.energy_plot.set_xlim(0, T_MAX)
-        self.energy_plot.set_ylim(0, fac)
-        self.energy_plot.grid(b=True, which='both')
-        self.energy_plot.xaxis.set_minor_locator(AutoMinorLocator(2))
+            fac = (np.max(np.abs(self.parent.solutions[0][2]))*(1+0.05) if np.max(np.abs(self.parent.solutions[0][2])) < 100 else 100)
+        self.vel_plot.set_xlim(0, T_MAX)
+        self.vel_plot.set_ylim(-fac, fac)
+        self.vel_plot.grid(b=True, which='both')
+        self.vel_plot.xaxis.set_minor_locator(AutoMinorLocator(2))
 
     def angle_diff_plot_init(self):
         self.angle_plot_diff.set_facecolor(Color.PLOT_BACKGROUND)
@@ -265,24 +280,26 @@ class AxisSetup:
         self.angle_plot_diff.set_ylabel('$\Delta \Theta$')
         self.angle_plot_diff.set_title('Angular difference $\Delta \Theta$')
 
-        fac = np.max(np.abs(self.parent.angle_diffs)) * (1 + 0.25) if np.abs(np.max(self.parent.angle_diffs)) < 100 else 100
+        fac1 = np.max(self.parent.angle_diffs) * (1 + 0.25) if np.max(self.parent.angle_diffs) < 100 else 100
+        fac2 = np.min(self.parent.angle_diffs) * (1 + 0.25)
 
+        self.angle_plot_diff.set_yscale("log")
         self.angle_plot_diff.set_xlim(0, T_MAX)
-        self.angle_plot_diff.set_ylim(-fac, fac)
+        self.angle_plot_diff.set_ylim(fac2, fac1+10)
         self.angle_plot_diff.grid(b=True, which='both')
-        self.angle_plot_diff.xaxis.set_minor_locator(AutoMinorLocator(2))
+        #self.angle_plot_diff.xaxis.set_minor_locator(AutoMinorLocator(2))
 
-    def energy_diff_plot_init(self):
-        self.energy_plot_diff.set_facecolor(Color.PLOT_BACKGROUND)
-        self.energy_plot_diff.set_xlabel('$t$')
-        self.energy_plot_diff.set_ylabel('$\Delta E$', rotation='horizontal')
-        self.energy_plot_diff.set_title('Energy difference $\Delta E$')
-        self.energy_plot_diff.yaxis.set_label_coords(-0.03, 1.02)
+    def vel_diff_plot_init(self):
+        self.vel_plot_diff.set_facecolor(Color.PLOT_BACKGROUND)
+        self.vel_plot_diff.set_xlabel('$t$')
+        self.vel_plot_diff.set_ylabel('$\Delta \omega$', rotation='horizontal')
+        self.vel_plot_diff.set_title('Angular velocity difference $\Delta \omega$')
+        self.vel_plot_diff.yaxis.set_label_coords(-0.03, 1.02)
 
-        fac = np.max(np.abs(self.parent.energy_diffs)) * (1 + 0.25) if np.abs(np.max(self.parent.energy_diffs)) < 100 else 100
+        fac = np.max(np.abs(self.parent.vel_diffs)) * (1 + 0.15) if np.abs(np.max(self.parent.vel_diffs)) < 100 else 100
 
 
-        self.energy_plot_diff.set_xlim(0, T_MAX)
-        self.energy_plot_diff.set_ylim(-fac, fac)
-        self.energy_plot_diff.grid(b=True, which='both')
-        self.energy_plot_diff.xaxis.set_minor_locator(AutoMinorLocator(2))
+        self.vel_plot_diff.set_xlim(0, T_MAX)
+        self.vel_plot_diff.set_ylim(-fac, fac)
+        self.vel_plot_diff.grid(b=True, which='both')
+        self.vel_plot_diff.xaxis.set_minor_locator(AutoMinorLocator(2))

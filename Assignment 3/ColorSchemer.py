@@ -1,6 +1,6 @@
 '''
     Handling the colorschemes of the interactive figure
-    For Assignment 1, TFY4345
+    For Assignment 3, TFY4345
     Created by: Haakon Svane
     Date: 12. September, 2019
 '''
@@ -29,7 +29,7 @@ class __schemes:
         "black",
         "white",
         "white",
-        "darkred",
+        "black",
         "darkgray",
         "black",
         "darkgray",
