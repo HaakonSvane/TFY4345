@@ -10,7 +10,9 @@ matplotlib.use('TKAgg')                 # Default backend (support for both wind
 from matplotlib.pyplot import rcParams
 
 FRAME_RATE = 60                         # Frames per second
-T_MAX = 600                             # Time-interval of each plot-segment (length of time-dependent plots)
+T_MAX = 90                              # Total time of calculation
+
+# Time-interval of each plot-segment (length of time-dependent plots)
 
 FIGURE_RATIO = (18, 10)                 # Format: ([WIDTH], [HEIGHT])
 FIGURE_SIZE_FACTOR = 6                  # Any number between 1-10 to set the scaling of the plot
@@ -33,7 +35,7 @@ init_theta_vel = 0                      # (rad/s)
 
 
 # Declaration of initial values and physical constants
-init_rod_length = g_acc               # (m)
+init_rod_length = g_acc                 # (m)
 init_bob_mass = 1                       # (kg)
 init_dt = 0.030                         # (s)
 pivot_coords = (0, 0)                   # ([x]m, [y]m)
